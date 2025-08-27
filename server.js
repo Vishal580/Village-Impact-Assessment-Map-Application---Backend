@@ -12,17 +12,21 @@ const app = express();
 // Connect to MongoDB
 connectDB();
 
-const isProduction = process.env.NODE_ENV === "production";
-
-const allowedOrigin = isProduction
-  ? process.env.PRODUCTION_URL
-  : process.env.DEV_URL || "http://localhost:3000";
+const allowedOrigins = [
+  process.env.DEV_URL || "http://localhost:3000",
+  process.env.PRODUCTION_URL || "https://village-impact-assessment-map.vercel.app"
+];
 
 app.use(cors({
-  origin: allowedOrigin,
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   credentials: true,
 }));
-
 
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
